@@ -52,4 +52,5 @@ public class User {
         this.valid = valid;
 
     }
+
 }

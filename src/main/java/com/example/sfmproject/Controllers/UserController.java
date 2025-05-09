@@ -44,6 +44,7 @@ public class UserController {
     public void validInscription(@PathVariable("idUser") Long idUser) {
         userServiceIMP.validInscription(idUser);
     }
+
     @PutMapping("/debloque-user/{idUser}")
     public void debloqueUser(@PathVariable("idUser") Long idUser) {
         userServiceIMP.debloqueUser(idUser);

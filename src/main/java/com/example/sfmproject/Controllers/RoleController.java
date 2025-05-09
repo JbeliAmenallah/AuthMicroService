@@ -22,6 +22,7 @@ public class RoleController  {
     public  void addRole(@PathVariable("RolesName") RoleUser roleName){
         roleServiceIMP.addRole(roleName);
     }
+
     @DeleteMapping("/deleteRole/{RolesName}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteRole(@PathVariable("RolesName") RoleUser roleName) {

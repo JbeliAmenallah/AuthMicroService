@@ -5,11 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtProvider {
@@ -23,17 +25,21 @@ public class JwtProvider {
     private int jwtExpiration;
 
     public String generateAccessToken(Authentication authentication) {
-
         UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
-        // long ACCESS_TOKEN_VALIDITY_MS =    50 * 1000;
-        long ACCESS_TOKEN_VALIDITY_MS =  5 * 24 * 60 * 60 * 1000;
+
+        long ACCESS_TOKEN_VALIDITY_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
         return Jwts.builder()
-                .setSubject((userPrincipal.getUsername()))
+                .setSubject(userPrincipal.getUsername())
+                .claim("email", userPrincipal.getEmail()) // Add email claim
+                .claim("roles", userPrincipal.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority) // Extract roles
+                        .collect(Collectors.toList()))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + ACCESS_TOKEN_VALIDITY_MS))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
+
     public String generateRefreshToken(Authentication authentication) {
         //long refreshTokenExpiration =  10*60 * 1000;
         long refreshTokenExpiration = 2L * 7 * 24 * 60 * 60 * 1000;

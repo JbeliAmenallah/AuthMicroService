@@ -193,7 +193,7 @@ public class UserServiceIMP implements UserServiceInterface {
         if (userRepository.existsByEmail(user1.getEmail())) {
             return new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
         }
-        User user = new User(user1.getName(), user1.getUsername(), user1.getEmail(), passwordEncoder.encode(user1.getPassword()), false, user1.getAddress(), false);
+        User user = new User(user1.getName(), user1.getUsername(), user1.getEmail(), passwordEncoder.encode(user1.getPassword()), false, user1.getAddress(), true);
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByRoleName(RoleUser.valueOf(roleName.trim()))
                 .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));

@@ -70,6 +70,10 @@ public class UserPrinciple implements UserDetails {
     public String getPassword() {
         return password;
     }
+    public String getEmail() {
+        return email; // Make sure this field exists
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
