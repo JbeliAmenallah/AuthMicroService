@@ -67,6 +67,7 @@ public class JwtAuthTokenFilter implements Filter {
         excludedUrls.add("/OTP/");
         excludedUrls.add("/Msg");
         excludedUrls.add("/api/auth/refreshToken");
+        excludedUrls.add("/oauth/github");
 
         String requestUri = httpRequest.getRequestURI();
         boolean isExcluded = false;
