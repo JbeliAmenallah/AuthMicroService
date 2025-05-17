@@ -94,13 +94,13 @@ public class OAuth2Controller {
 //        }
 //    }
 
-    private JwtResponse generateTokens(User user) {
+    private JwtResponse generateTokens(User user , String githubAccessToken) {
         UserPrinciple userPrinciple = UserPrinciple.build(user);
 
         // Generate JWT tokens for the user
         Authentication authentication = new UsernamePasswordAuthenticationToken(userPrinciple, null, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String accessToken = jwtProvider.generateAccessToken(authentication);
+        String accessToken = jwtProvider.generateAccessToken(authentication, githubAccessToken);
         String refreshToken = jwtProvider.generateRefreshToken(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 

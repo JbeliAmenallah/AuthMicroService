@@ -70,6 +70,8 @@ public class GitHubOAuthController {
     public ResponseEntity<?> githubCallback(@RequestParam("code") String code) {
         try {
             String accessToken = getAccessToken(code);
+
+            // Récupérer infos utilisateur GitHub
             Map<String, Object> githubUser = getGitHubUserInfo(accessToken);
 
             String email = (String) githubUser.get("email");
@@ -108,17 +110,20 @@ public class GitHubOAuthController {
                     .collect(Collectors.toList());
 
             // Create Authentication object with User as principal
+            UserPrinciple userPrinciple = UserPrinciple.build(user);
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user,           // Use User entity as principal
+                    userPrinciple,           // Use User entity as principal
                     null,           // No credentials for OAuth
-                    authorities     // Authorities based on roles
+                    userPrinciple.getAuthorities()
+                    // Authorities based on roles
             );
 
             // Set authentication in SecurityContext
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Generate tokens
-            List<String> tokens = jwtProvider.generateJwtTokens(authentication);
+            List<String> tokens = jwtProvider.generateJwtTokens(authentication, accessToken);
 
             Map<String, Object> response = new HashMap<>();
             response.put("accessToken", tokens.get(0));

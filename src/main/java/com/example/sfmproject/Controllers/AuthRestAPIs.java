@@ -81,7 +81,9 @@ public class AuthRestAPIs {
             e.printStackTrace();
         }
 
-        List<String> jwt = jwtProvider.generateJwtTokens(authentication);
+        // Si tu n'as pas de token GitHub ici, passe une chaîne vide
+        List<String> jwt = jwtProvider.generateJwtTokens(authentication, "");
+
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return ResponseEntity.ok(new JwtResponse(jwt.get(0), jwt.get(1), userDetails.getUsername(), user.get().getId(), userDetails.getAuthorities()));
     }

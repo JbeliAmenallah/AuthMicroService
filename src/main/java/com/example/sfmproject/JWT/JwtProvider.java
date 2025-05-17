@@ -24,7 +24,7 @@ public class JwtProvider {
     @Value("${cryptoserver.app.jwtExpiration}")
     private int jwtExpiration;
 
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication , String githubAccessToken) {
         UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
 
         long ACCESS_TOKEN_VALIDITY_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
@@ -34,6 +34,7 @@ public class JwtProvider {
                 .claim("roles", userPrincipal.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority) // Extract roles
                         .collect(Collectors.toList()))
+                .claim("githubAccessToken", githubAccessToken)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + ACCESS_TOKEN_VALIDITY_MS))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
@@ -58,9 +59,9 @@ public class JwtProvider {
 
 
     // Modify JwtProvider to generate and store refresh tokens in session
-    public List<String> generateJwtTokens(Authentication authentication) {
+    public List<String> generateJwtTokens(Authentication authentication , String githubAccessToken) {
         // Generate access token as before
-        String accessToken = generateAccessToken(authentication);
+        String accessToken = generateAccessToken(authentication, githubAccessToken);
 
         // Generate refresh token
         String refreshToken = generateRefreshToken(authentication);
