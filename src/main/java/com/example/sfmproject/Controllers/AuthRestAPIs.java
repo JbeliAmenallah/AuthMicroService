@@ -10,6 +10,7 @@ import com.example.sfmproject.Repositories.RoleRepository;
 import com.example.sfmproject.Repositories.UserRepository;
 import com.example.sfmproject.ServiceImpl.MailSenderService;
 import com.example.sfmproject.ServiceImpl.UserServiceIMP;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -60,11 +61,9 @@ public class AuthRestAPIs {
     public ResponseEntity<JwtResponse> authenticateUser(@RequestBody SignIn login, HttpServletRequest request) {
         Optional<User> userByEmail = userRepository.findByEmail(login.getEmail());
         Optional<User> userByUsername = userRepository.findByUsername(login.getEmail());
-
-        // Combine the results from both searches
         Optional<User> user = userByEmail.isPresent() ? userByEmail : userByUsername;
 
-        if(user.get().isBlocked()&& user.get().isValid()){
+        if (user.isPresent() && user.get().isBlocked() && user.get().isValid()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -72,14 +71,22 @@ public class AuthRestAPIs {
                 new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        // Send email upon successful login
+        String subject = "CIAOOOO BELLOOO ----> Login Successful";
+        String body = "Welcome back, " + user.get().getName() + "! You have logged in successfully.";
+        try {
+            mailSending.send(user.get().getEmail(), subject, body);
+        } catch (MessagingException e) {
+            // Handle email sending exception
+            e.printStackTrace();
+        }
 
         // Si tu n'as pas de token GitHub ici, passe une chaîne vide
         List<String> jwt = jwtProvider.generateJwtTokens(authentication, "");
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return ResponseEntity.ok(new JwtResponse(jwt.get(0),jwt.get(1), userDetails.getUsername(),user.get().getId(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(jwt.get(0), jwt.get(1), userDetails.getUsername(), user.get().getId(), userDetails.getAuthorities()));
     }
-
 
     /* @PostMapping("/signIn")
 
@@ -120,4 +127,34 @@ public class AuthRestAPIs {
     public ResponseEntity<User> registerAdmin(@Valid @RequestBody User user)  {
         return userServiceIMP.registerAdmin(user);
     }
+
+
+//    @PostMapping("/emailsignIn")
+//    public ResponseEntity<JwtResponse> authenticateUser2(@RequestBody SignIn login, HttpServletRequest request) {
+//        Optional<User> userByEmail = userRepository.findByEmail(login.getEmail());
+//        Optional<User> userByUsername = userRepository.findByUsername(login.getEmail());
+//        Optional<User> user = userByEmail.isPresent() ? userByEmail : userByUsername;
+//
+//        if (user.isPresent() && user.get().isBlocked() && user.get().isValid()) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword()));
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//        // Send email upon successful login
+//        String subject = "Login Successful";
+//        String body = "Welcome back, " + user.get().getName() + "! You have logged in successfully.";
+//        try {
+//            mailSending.send(user.get().getEmail(), subject, body);
+//        } catch (MessagingException e) {
+//            // Handle email sending exception
+//            e.printStackTrace();
+//        }
+//
+//        List<String> jwt = jwtProvider.generateJwtTokens(authentication);
+//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//        return ResponseEntity.ok(new JwtResponse(jwt.get(0), jwt.get(1), userDetails.getUsername(), user.get().getId(), userDetails.getAuthorities()));
+//    }
 }
