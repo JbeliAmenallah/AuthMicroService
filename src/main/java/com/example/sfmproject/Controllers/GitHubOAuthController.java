@@ -57,7 +57,7 @@ public class GitHubOAuthController {
     @GetMapping("/login")
     public ResponseEntity<Void> redirectToGitHub() {
         String githubLoginUrl = String.format(
-                "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=user:email",
+                "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=user:email%%20read:org",
                 clientId,
                 URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
         );
@@ -130,6 +130,10 @@ public class GitHubOAuthController {
             response.put("refreshToken", tokens.get(1));
             response.put("user", user);
 
+            // Récupérer les organisations depuis githubUser et les mettre dans la réponse JSON
+            List<Map<String, Object>> githubOrgs = (List<Map<String, Object>>) githubUser.get("orgs");
+            response.put("githubOrgs", githubOrgs);
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -187,6 +191,17 @@ public class GitHubOAuthController {
                 }
             }
         }
+
+        // ✅ 3. Ajouter la récupération des organisations ici
+        ResponseEntity<List> orgsResponse = restTemplate.exchange(
+                "https://api.github.com/user/orgs",
+                HttpMethod.GET,
+                entity,
+                List.class
+        );
+        List<Map<String, Object>> orgs = orgsResponse.getBody();
+        System.out.println("GitHub orgs response: " + orgs);
+        userInfo.put("orgs", orgs);
 
         return userInfo;
     }
