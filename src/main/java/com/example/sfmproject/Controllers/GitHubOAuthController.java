@@ -157,7 +157,10 @@ public class GitHubOAuthController {
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
         ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+
+
         return (String) response.getBody().get("access_token");
+
     }
 
     private Map<String, Object> getGitHubUserInfo(String accessToken) {
