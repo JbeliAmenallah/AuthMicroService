@@ -24,7 +24,7 @@ public class JwtProvider {
     @Value("${cryptoserver.app.jwtExpiration}")
     private int jwtExpiration;
 
-    public String generateAccessToken(Authentication authentication , String githubAccessToken) {
+    public String generateAccessToken(Authentication authentication, String githubAccessToken) {
         UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
 
         long ACCESS_TOKEN_VALIDITY_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
@@ -59,7 +59,7 @@ public class JwtProvider {
 
 
     // Modify JwtProvider to generate and store refresh tokens in session
-    public List<String> generateJwtTokens(Authentication authentication , String githubAccessToken) {
+    public List<String> generateJwtTokens(Authentication authentication, String githubAccessToken) {
         // Generate access token as before
         String accessToken = generateAccessToken(authentication, githubAccessToken);
 
@@ -74,7 +74,6 @@ public class JwtProvider {
         // Return the list containing both tokens
         return tokens;
     }
-
 
 
     public boolean validateJwtToken(String authToken) {
@@ -101,5 +100,15 @@ public class JwtProvider {
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody().getSubject();
+    }
+
+    public String extractGithubAccessToken(String jwtToken) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(jwtToken)
+                .getBody();
+
+        return claims.get("githubAccessToken", String.class);
+
     }
 }

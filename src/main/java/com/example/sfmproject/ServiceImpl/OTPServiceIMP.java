@@ -41,6 +41,29 @@ public class OTPServiceIMP implements OTPInterface {
         return otpObject;
     }
 
+    public Boolean verifyAndActivate(String email, String otpCode) {
+        OTP otp = otpRepository.findByIdentification(otpCode);
+
+        if (otp == null) {
+            return false;
+        }
+
+        Date now = new Date();
+        if (now.after(otp.getExpiredDate())) {
+            return false; // OTP expiré
+        }
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setValid(true);
+            userRepository.save(user);
+            return true;
+        }
+
+        return false; // utilisateur introuvable
+    }
+
     @Override
     public Boolean VerifOTP(String identification) {
         // Retrieve the OTP object from the repository based on the identification

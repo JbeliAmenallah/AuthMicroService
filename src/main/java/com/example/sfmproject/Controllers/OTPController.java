@@ -19,6 +19,15 @@ public class OTPController {
     public OTP GenerateOTp() {
         return otpInterface.GenerateOTp();
     }
+
+    @PostMapping("/verify-and-activate/{email}/{otp}")
+    public Boolean verifyAndActivate(
+            @PathVariable("email") String email,
+            @PathVariable("otp") String otpCode) {
+        return otpService.verifyAndActivate(email, otpCode);
+    }
+
+
     @PostMapping("/VerifOTP/{identification}")
     public Boolean VerifOTP(@PathVariable   ("identification") String identification)  {
         return otpService.VerifOTP(identification);

@@ -1,4 +1,4 @@
-package com.example.sfmproject.Controllers;
+package com.example.sfmproject.Controllers.OAuthGitHub;
 
 import com.example.sfmproject.Entities.Enum.RoleUser;
 import com.example.sfmproject.Entities.Role;
@@ -8,17 +8,13 @@ import com.example.sfmproject.JWT.JwtProvider;
 import com.example.sfmproject.Repositories.RoleRepository;
 import com.example.sfmproject.Repositories.UserRepository;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,7 +23,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/oauth/github")
@@ -66,12 +61,10 @@ public class GitHubOAuthController {
                 .build();
     }
 
-    @GetMapping("/callback")
-    public ResponseEntity<?> githubCallback(@RequestParam("code") String code) {
+    @GetMapping("/token")
+    public ResponseEntity<?> handleGitHubCode(@RequestParam("code") String code) {
         try {
             String accessToken = getAccessToken(code);
-
-            // Récupérer infos utilisateur GitHub
             Map<String, Object> githubUser = getGitHubUserInfo(accessToken);
 
             String email = (String) githubUser.get("email");
@@ -82,57 +75,35 @@ public class GitHubOAuthController {
                 return ResponseEntity.badRequest().body("Could not retrieve email from GitHub");
             }
 
-            // Check if user exists, create if not
-            User user = userRepository.findByEmail(email)
-                    .orElseGet(() -> {
-                        // Use the constructor from User entity
-                        User newUser = new User(
-                                name != null ? name : username, // name
-                                username,                      // username
-                                email,                         // email
-                                UUID.randomUUID().toString(),  // Random password for OAuth users
-                                false,                         // blocked
-                                null,                          // address (optional, set to null)
-                                true                           // valid
-                        );
+            // Same user logic as before
+            User user = userRepository.findByEmail(email).orElseGet(() -> {
+                User newUser = new User(
+                        name != null ? name : username,
+                        username,
+                        email,
+                        UUID.randomUUID().toString(),
+                        false,
+                        null,
+                        true
+                );
+                Role userRole = roleRepository.findByRoleName(RoleUser.Utilisateur)
+                        .orElseThrow(() -> new RuntimeException("Role not found"));
+                newUser.setRoles(Set.of(userRole));
+                return userRepository.save(newUser);
+            });
 
-                        // Assign default role
-                        Role userRole = roleRepository.findByRoleName(RoleUser.Utilisateur)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        newUser.setRoles(new HashSet<>(Set.of(userRole)));
-
-                        return userRepository.save(newUser);
-                    });
-
-            // Create authorities from user roles
-            List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName().name()))
-                    .collect(Collectors.toList());
-
-            // Create Authentication object with User as principal
+            // Auth and tokens
             UserPrinciple userPrinciple = UserPrinciple.build(user);
+            Authentication auth = new UsernamePasswordAuthenticationToken(userPrinciple, null, userPrinciple.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    userPrinciple,           // Use User entity as principal
-                    null,           // No credentials for OAuth
-                    userPrinciple.getAuthorities()
-                    // Authorities based on roles
-            );
-
-            // Set authentication in SecurityContext
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Generate tokens
-            List<String> tokens = jwtProvider.generateJwtTokens(authentication, accessToken);
+            List<String> tokens = jwtProvider.generateJwtTokens(auth, accessToken);
 
             Map<String, Object> response = new HashMap<>();
             response.put("accessToken", tokens.get(0));
             response.put("refreshToken", tokens.get(1));
             response.put("user", user);
-
-            // Récupérer les organisations depuis githubUser et les mettre dans la réponse JSON
-            List<Map<String, Object>> githubOrgs = (List<Map<String, Object>>) githubUser.get("orgs");
-            response.put("githubOrgs", githubOrgs);
+            response.put("githubOrgs", githubUser.get("orgs"));
 
             return ResponseEntity.ok(response);
 
@@ -141,6 +112,83 @@ public class GitHubOAuthController {
                     .body("GitHub OAuth failed: " + e.getMessage());
         }
     }
+
+
+//    @GetMapping("/callback")
+//    public ResponseEntity<?> githubCallback(@RequestParam("code") String code) {
+//        try {
+//            String accessToken = getAccessToken(code);
+//
+//            // Récupérer infos utilisateur GitHub
+//            Map<String, Object> githubUser = getGitHubUserInfo(accessToken);
+//
+//            String email = (String) githubUser.get("email");
+//            String name = (String) githubUser.get("name");
+//            String username = (String) githubUser.get("login");
+//
+//            if (email == null) {
+//                return ResponseEntity.badRequest().body("Could not retrieve email from GitHub");
+//            }
+//
+//            // Check if user exists, create if not
+//            User user = userRepository.findByEmail(email)
+//                    .orElseGet(() -> {
+//                        // Use the constructor from User entity
+//                        User newUser = new User(
+//                                name != null ? name : username, // name
+//                                username,                      // username
+//                                email,                         // email
+//                                UUID.randomUUID().toString(),  // Random password for OAuth users
+//                                false,                         // blocked
+//                                null,                          // address (optional, set to null)
+//                                true                           // valid
+//                        );
+//
+//                        // Assign default role
+//                        Role userRole = roleRepository.findByRoleName(RoleUser.Utilisateur)
+//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+//                        newUser.setRoles(new HashSet<>(Set.of(userRole)));
+//
+//                        return userRepository.save(newUser);
+//                    });
+//
+//            // Create authorities from user roles
+//            List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+//                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName().name()))
+//                    .collect(Collectors.toList());
+//
+//            // Create Authentication object with User as principal
+//            UserPrinciple userPrinciple = UserPrinciple.build(user);
+//
+//            Authentication authentication = new UsernamePasswordAuthenticationToken(
+//                    userPrinciple,           // Use User entity as principal
+//                    null,           // No credentials for OAuth
+//                    userPrinciple.getAuthorities()
+//                    // Authorities based on roles
+//            );
+//
+//            // Set authentication in SecurityContext
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//            // Generate tokens
+//            List<String> tokens = jwtProvider.generateJwtTokens(authentication, accessToken);
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("accessToken", tokens.get(0));
+//            response.put("refreshToken", tokens.get(1));
+//            response.put("user", user);
+//
+//            // Récupérer les organisations depuis githubUser et les mettre dans la réponse JSON
+//            List<Map<String, Object>> githubOrgs = (List<Map<String, Object>>) githubUser.get("orgs");
+//            response.put("githubOrgs", githubOrgs);
+//
+//            return ResponseEntity.ok(response);
+//
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("GitHub OAuth failed: " + e.getMessage());
+//        }
+//    }
     private String getAccessToken(String code) throws IOException {
         String url = "https://github.com/login/oauth/access_token";
 
