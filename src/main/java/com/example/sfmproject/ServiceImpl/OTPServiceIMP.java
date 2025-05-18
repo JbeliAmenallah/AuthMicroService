@@ -96,15 +96,18 @@ public class OTPServiceIMP implements OTPInterface {
     @Override
     public OTP ResendOTP(String email) {
         // Check if the existing OTP has expired
-
         OTP newOtp= GenerateOTp();
         Optional<User> user = userRepository.findByEmail(email);
         String verificationCode = newOtp.getIdentification() ;// Replace with your actual verification code
+        String userEmail = user.get().getEmail();
+        String url = "http://localhost:4200/verification/"+userEmail ;
+        String newLine = "<br/>"; // HTML line break
         String htmlMessage = "<div style='border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;'>"
-                + "Soyez le bienvenue dans notre plateforme /n"
-                + "Veuillez utiliser ce lien pour vous authentifier : /n "
-                + "<strong>Verification Code ! max 5 min ! :</strong>  /n" + verificationCode +
-                "</div>";
+                + "Soyez le bienvenue dans notre plateforme" + newLine
+                + "Veuillez utiliser ce lien pour vous authentifier : " + newLine
+                + "<a href='" + url + "'>" + url + "</a>" + newLine
+                + "<strong>Verification Code ! max 5 min ! :</strong> " + verificationCode + newLine
+                + "</div>";
         try {
             mailSending.send(user.get().getEmail(), "Welcome"+ user.get().getName() , htmlMessage);
         } catch (Exception e) {
