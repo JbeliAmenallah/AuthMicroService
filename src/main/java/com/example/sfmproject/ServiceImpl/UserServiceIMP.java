@@ -206,7 +206,8 @@ public class UserServiceIMP implements UserServiceInterface {
         User suser = userRepository.save(user);
         if (suser != null) {
             //String Newligne = System.getProperty("line.separator");
-            String url = "http://localhost:4200/#/verification" ;
+            String userEmail = user.getEmail();
+            String url = "http://localhost:4200/verification/"+userEmail ;
             String verificationCode = otpInterface.GenerateOTp().getIdentification(); // Replace with your actual verification code
             String newLine = "<br/>"; // HTML line break
             String htmlMessage = "<div style='border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;'>"
