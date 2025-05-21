@@ -120,6 +120,34 @@ public class GitHubService {
 
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
     }
+    public ResponseEntity<String> listRepositoryContent(String githubAccessToken, String owner, String repoName) {
+        // Build the API URL
+        String url = GITHUB_API_URL + "/repos/" + owner + "/" + repoName + "/contents";
+        System.out.println(url);
+        // Set up headers with authorization
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+
+        // Create the request entity
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        // Make the GET request
+        try {
+            return restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class
+            );
+        } catch (Exception e) {
+            // Handle exceptions (e.g., repository not found, unauthorized, etc.)
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse.toString());
+        }
+    }
+
 
     // Get contribution data (using GitHub GraphQL API or fallback)
     // Here we will fetch user public events as contribution data example

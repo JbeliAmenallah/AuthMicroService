@@ -161,4 +161,22 @@ public class GitHubController {
                     .body("Failed to fetch contribution data");
         }
     }
+    @GetMapping("/repos/{owner}/{repoName}/contents")
+    public ResponseEntity<String> getRepositoryContent(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String owner,
+            @PathVariable String repoName) {
+        try {
+            // Extract the token without "Bearer " prefix if necessary
+            String jwt = token.replace("Bearer ", "");
+            String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+            // Call the service method
+            return gitHubService.listRepositoryContent(githubToken, owner, repoName);
+        } catch (Exception e) {
+            // Return an error response if an exception occurs
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving repository content: " + e.getMessage());
+        }
+    }
+
 }
