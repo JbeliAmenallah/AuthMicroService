@@ -42,5 +42,23 @@ public class GitHubService {
                 String.class
         );
     }
+        public ResponseEntity<String> addCollaborator(String githubAccessToken, String owner, String repo, String username, String permission) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubAccessToken);
+            headers.set("Accept", "application/vnd.github.v3+json");
+            headers.set("Content-Type", "application/json");
+
+            String body = String.format("{\"permission\": \"%s\"}", permission);
+            HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+            String url = String.format("https://api.github.com/repos/%s/%s/collaborators/%s", owner, repo, username);
+
+            return restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    entity,
+                    String.class
+            );
+        }
 }
 

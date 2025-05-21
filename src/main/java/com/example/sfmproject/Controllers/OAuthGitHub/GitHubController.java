@@ -1,13 +1,11 @@
 package com.example.sfmproject.Controllers.OAuthGitHub;
 
+import com.example.sfmproject.DTO.CollaboratorRequest;
 import com.example.sfmproject.JWT.JwtProvider;
 import com.example.sfmproject.ServiceImpl.GitHubService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/github")
@@ -25,6 +23,25 @@ public class GitHubController {
         String githubToken = jwtProvider.extractGithubAccessToken(jwt); // extrait du JWT
 
         ResponseEntity<String> response = gitHubService.getGitHubUserInfo(githubToken);
+        return ResponseEntity.ok(response.getBody());
+    }
+
+    @PostMapping("/add-collaborator")
+    public ResponseEntity<?> addCollaborator(
+            @RequestHeader("Authorization") String token,
+            @RequestBody CollaboratorRequest request) {
+
+        String jwt = token.replace("Bearer ", "");
+        String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+
+        ResponseEntity<String> response = gitHubService.addCollaborator(
+                githubToken,
+                request.getOwner(),
+                request.getRepo(),
+                request.getUsername(),
+                request.getPermission()
+        );
+
         return ResponseEntity.ok(response.getBody());
     }
 

@@ -69,6 +69,7 @@ public class JwtAuthTokenFilter implements Filter {
         excludedUrls.add("/api/auth/refreshToken");
         excludedUrls.add("/oauth/github");
 
+
         String requestUri = httpRequest.getRequestURI();
         boolean isExcluded = false;
         for (String excludedUrl : excludedUrls) {
