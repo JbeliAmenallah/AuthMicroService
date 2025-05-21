@@ -52,10 +52,12 @@ public class GitHubOAuthController {
     @GetMapping("/login")
     public ResponseEntity<Void> redirectToGitHub() {
         String githubLoginUrl = String.format(
-                "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=user:email%%20read:org",
+                "https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&scope=%s",
                 clientId,
-                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
+                URLEncoder.encode("user:email read:org repo admin:repo_hook gist write:packages read:packages workflow", StandardCharsets.UTF_8)
         );
+
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(githubLoginUrl))
                 .build();
