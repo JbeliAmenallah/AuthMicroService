@@ -3,6 +3,7 @@ package com.example.sfmproject.ServiceImpl;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -94,5 +95,60 @@ public class GitHubService {
                     String.class
             );
         }
+    // Get starred repositories
+    public ResponseEntity<String> getStarredRepos(String githubAccessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+        headers.set("Content-Type", "application/json");
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = GITHUB_API_URL + "/user/starred";
+
+        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+    }
+
+    // Get organizations
+    public ResponseEntity<String> getOrganizations(String githubAccessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+        headers.set("Content-Type", "application/json");
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = GITHUB_API_URL + "/user/orgs";
+
+        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+    }
+
+    // Get contribution data (using GitHub GraphQL API or fallback)
+    // Here we will fetch user public events as contribution data example
+    public ResponseEntity<String> getContributionData(String githubAccessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+        headers.set("Content-Type", "application/json");
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = GITHUB_API_URL + "/users/{username}/events/public";
+
+        // To get username, we may need to get user info first
+        // Simplification: You can modify to accept username or get it internally
+        // For demo, let's call /user endpoint to get username:
+
+        ResponseEntity<Map> userResponse = restTemplate.exchange(
+                GITHUB_API_URL + "/user",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                Map.class);
+
+        if (userResponse.getStatusCode() == HttpStatus.OK && userResponse.getBody() != null) {
+            String username = (String) userResponse.getBody().get("login");
+            String eventsUrl = GITHUB_API_URL + "/users/" + username + "/events/public";
+            return restTemplate.exchange(eventsUrl, HttpMethod.GET, entity, String.class);
+        } else {
+            return new ResponseEntity<>("Unable to fetch user info", HttpStatus.BAD_REQUEST);
+        }
+    }
 }
 

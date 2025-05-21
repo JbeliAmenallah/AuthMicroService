@@ -18,7 +18,7 @@ public class MailSenderService {
         MimeMessageHelper helper;
         helper = new MimeMessageHelper(message, true); // true indicates
         helper.setSubject(subject);
-        helper.setFrom("louaysghaier01@gmail.com");
+        helper.setFrom("amounqj@gmail.com");
 
         helper.setTo(to);
         helper.setText(body, true); // true indicates html
@@ -28,3 +28,4 @@ public class MailSenderService {
     }
 
 }
+

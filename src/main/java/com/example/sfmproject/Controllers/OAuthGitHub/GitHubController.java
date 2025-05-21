@@ -13,7 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
+//@CrossOrigin
 @RestController
 @RequestMapping("/api/github")
 public class GitHubController {
@@ -103,6 +103,62 @@ public class GitHubController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: " + e.getMessage());
+        }
+    }
+    @GetMapping("/starred")
+    public ResponseEntity<String> getStarredRepos(@RequestHeader("Authorization") String token) {
+        try {
+            // Token comes as "Bearer <token>", so strip "Bearer "
+            String jwt = token.replace("Bearer ", "");
+            String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+            String response = gitHubService.getStarredRepos(githubToken).getBody();
+
+            // Check for null or empty response
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.noContent().build(); // HTTP 204 No Content
+            }
+            return ResponseEntity.ok(response); // HTTP 200 OK with the response body
+        } catch (Exception e) {
+            // Log the exception (optional) and return HTTP 500 Internal Server Error
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch starred repositories");
+        }
+    }
+
+    @GetMapping("/organizations")
+    public ResponseEntity<String> getOrganizations(@RequestHeader("Authorization") String token) {
+        try {
+            String jwt = token.replace("Bearer ", "");
+            String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+            String response = gitHubService.getOrganizations(githubToken).getBody();
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.noContent().build(); // HTTP 204 No Content
+            }
+            return ResponseEntity.ok(response); // HTTP 200 OK with the response body
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch organizations");
+        }
+    }
+
+    @GetMapping("/contributions")
+    public ResponseEntity<String> getContributionData(@RequestHeader("Authorization") String token) {
+        try {
+            String jwt = token.replace("Bearer ", "");
+            String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+            String response = gitHubService.getContributionData(githubToken).getBody();
+
+            if (response == null || response.isEmpty()) {
+                return ResponseEntity.noContent().build(); // HTTP 204 No Content
+            }
+            return ResponseEntity.ok(response); // HTTP 200 OK with the response body
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch contribution data");
         }
     }
 }
