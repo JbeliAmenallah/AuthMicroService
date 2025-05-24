@@ -5,6 +5,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,24 +78,24 @@ public class GitHubService {
         Map<String, Object> responseBody = response.getBody();
         return responseBody;
     }
-        public ResponseEntity<String> addCollaborator(String githubAccessToken, String owner, String repo, String username, String permission) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(githubAccessToken);
-            headers.set("Accept", "application/vnd.github.v3+json");
-            headers.set("Content-Type", "application/json");
+    public ResponseEntity<String> addCollaborator(String githubAccessToken, String owner, String repo, String username, String permission) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+        headers.set("Content-Type", "application/json");
 
-            String body = String.format("{\"permission\": \"%s\"}", permission);
-            HttpEntity<String> entity = new HttpEntity<>(body, headers);
+        String body = String.format("{\"permission\": \"%s\"}", permission);
+        HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
-            String url = String.format("https://api.github.com/repos/%s/%s/collaborators/%s", owner, repo, username);
+        String url = String.format("https://api.github.com/repos/%s/%s/collaborators/%s", owner, repo, username);
 
-            return restTemplate.exchange(
-                    url,
-                    HttpMethod.PUT,
-                    entity,
-                    String.class
-            );
-        }
+        return restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                entity,
+                String.class
+        );
+    }
     // Get starred repositories
     public ResponseEntity<String> getStarredRepos(String githubAccessToken) {
         HttpHeaders headers = new HttpHeaders();
@@ -177,6 +178,28 @@ public class GitHubService {
         } else {
             return new ResponseEntity<>("Unable to fetch user info", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public String getRepoContent(String owner, String repo, String path, String token) {
+        String url = UriComponentsBuilder
+                .fromHttpUrl("https://api.github.com/repos/{owner}/{repo}/contents/{path}")
+                .buildAndExpand(owner, repo, path)
+                .toUriString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/vnd.github.v3+json");
+
+        // Optional: if the repo is private or you want to increase rate limit
+        if (token != null && !token.isEmpty()) {
+            headers.setBearerAuth(token);
+        }
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, String.class);
+
+        return response.getBody();
     }
 }
 

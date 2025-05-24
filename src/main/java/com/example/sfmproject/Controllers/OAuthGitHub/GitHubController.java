@@ -5,6 +5,7 @@ import com.example.sfmproject.DTO.CollaboratorRequest;
 import com.example.sfmproject.JWT.JwtProvider;
 import com.example.sfmproject.ServiceImpl.GitHubService;
 import io.jsonwebtoken.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -161,22 +162,43 @@ public class GitHubController {
                     .body("Failed to fetch contribution data");
         }
     }
-    @GetMapping("/repos/{owner}/{repoName}/contents")
-    public ResponseEntity<String> getRepositoryContent(
+
+
+    @GetMapping("/repos/{owner}/{repo}/contents/**")
+    public ResponseEntity<String> getFileContent(
             @RequestHeader("Authorization") String token,
             @PathVariable String owner,
-            @PathVariable String repoName) {
+            @PathVariable String repo,
+            HttpServletRequest request) {
         try {
-            // Extract the token without "Bearer " prefix if necessary
+            // Extract JWT token
             String jwt = token.replace("Bearer ", "");
             String githubToken = jwtProvider.extractGithubAccessToken(jwt);
-            // Call the service method
-            return gitHubService.listRepositoryContent(githubToken, owner, repoName);
+
+            // Extract the dynamic path after /contents/
+            String uri = request.getRequestURI();
+            String prefix = String.format("/api/github/repos/%s/%s/contents", owner, repo);
+
+            String path = "";
+            if (uri.length() > prefix.length()) {
+                // The URI has something after the prefix (may or may not start with '/')
+                path = uri.substring(prefix.length());
+                // Remove leading slash if present
+                if (path.startsWith("/")) {
+                    path = path.substring(1);
+                }
+            }
+
+            // Call your service with the resolved path
+            String content = gitHubService.getRepoContent(owner, repo, path, githubToken);
+            return ResponseEntity.ok(content);
+
         } catch (Exception e) {
-            // Return an error response if an exception occurs
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error retrieving repository content: " + e.getMessage());
+                    .body("Failed to get file content: " + e.getMessage());
         }
     }
+
+
 
 }

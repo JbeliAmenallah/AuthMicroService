@@ -137,7 +137,7 @@ public class UserServiceIMP implements UserServiceInterface {
         User user1 = user.get();
         String Newligne = System.getProperty("line.separator");
         String url = "http://localhost:4200/auth/verification/" + user1.getToken();
-        String body = "Soyez le bienvenue dans notre platforme ECOtalan  \n  veuillez utuliser ce lien là pour s'authentifier :" + Newligne + url + Newligne + "verification" +
+        String body = "Soyez le bienvenue dans notre platforme GITHUB  \n  veuillez utuliser ce lien là pour s'authentifier :" + Newligne + url + Newligne + "verification" +
                 "Voici votre code de verfication  TN1122" ;
         if (user.isPresent()) {
 

@@ -8,6 +8,11 @@ import com.example.sfmproject.JWT.JwtProvider;
 import com.example.sfmproject.Repositories.RoleRepository;
 import com.example.sfmproject.Repositories.UserRepository;
 
+import com.example.sfmproject.ServiceImpl.GitHubService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -49,6 +54,9 @@ public class GitHubOAuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    GitHubService gitHubService;
+
     @GetMapping("/login")
     public ResponseEntity<Void> redirectToGitHub() {
         String githubLoginUrl = String.format(
@@ -88,7 +96,7 @@ public class GitHubOAuthController {
                         null,
                         true
                 );
-                Role userRole = roleRepository.findByRoleName(RoleUser.Utilisateur)
+                Role userRole = roleRepository.findByRoleName(RoleUser.ADMIN)
                         .orElseThrow(() -> new RuntimeException("Role not found"));
                 newUser.setRoles(Set.of(userRole));
                 return userRepository.save(newUser);
@@ -116,7 +124,7 @@ public class GitHubOAuthController {
     }
 
 
-//    @GetMapping("/callback")
+    //    @GetMapping("/callback")
 //    public ResponseEntity<?> githubCallback(@RequestParam("code") String code) {
 //        try {
 //            String accessToken = getAccessToken(code);
@@ -258,5 +266,17 @@ public class GitHubOAuthController {
 
         return userInfo;
     }
+
+    @GetMapping("/contents")
+    public String getRepoContents(
+            @RequestParam String owner,
+            @RequestParam String repo,
+            @RequestParam String path,
+            @RequestParam(required = false) String token
+    ) {
+        return gitHubService.getRepoContent(owner, repo, path, token);
+    }
+
+
 }
 
