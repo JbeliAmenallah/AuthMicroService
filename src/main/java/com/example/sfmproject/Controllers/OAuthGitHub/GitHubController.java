@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 //@CrossOrigin
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/github")
 public class GitHubController {
@@ -177,21 +178,23 @@ public class GitHubController {
 
             // Extract the dynamic path after /contents/
             String uri = request.getRequestURI();
+            System.out.println("Request URI: " + uri);
             String prefix = String.format("/api/github/repos/%s/%s/contents", owner, repo);
-
+            System.out.println("Prefix: " + prefix);
             String path = "";
             if (uri.length() > prefix.length()) {
                 // The URI has something after the prefix (may or may not start with '/')
                 path = uri.substring(prefix.length());
+                System.out.println("Extracted path: " + path);
                 // Remove leading slash if present
                 if (path.startsWith("/")) {
                     path = path.substring(1);
+                    System.out.println("Path after removing leading slash: " + path);
                 }
             }
-
             // Call your service with the resolved path
-            String content = gitHubService.getRepoContent(owner, repo, path, githubToken);
-            return ResponseEntity.ok(content);
+            String content = gitHubService.getRepoContent(owner, repo, path, githubToken).getBody();
+            return ResponseEntity.status(HttpStatus.OK).body(content);
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -200,5 +203,39 @@ public class GitHubController {
     }
 
 
+    @GetMapping("/fileContent/{owner}/{repo}/**")
+    public ResponseEntity<String> displayFileContent(
+            @PathVariable String owner,
+            @PathVariable String repo,
+            HttpServletRequest request) {
+
+        try {
+            // Full request URI
+            String uri = request.getRequestURI();
+
+            // Build prefix: everything before the file path
+            String prefix = "/api/github/fileContent/" + owner + "/" + repo + "/";
+
+            // Actual file path (may include ?token=... as part of it)
+            String pathWithQuery = uri.substring(prefix.length());
+
+            // Include query string if present (e.g., ?token=...)
+            String query = request.getQueryString();
+            if (query != null) {
+                pathWithQuery += "?" + query;
+            }
+
+            // Now fetch the raw GitHub content (public access)
+            String rawUrl = "https://raw.githubusercontent.com/" + owner + "/" + repo + "/" + pathWithQuery;
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(rawUrl, String.class);
+
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching file: " + e.getMessage());
+        }
+    }
 
 }

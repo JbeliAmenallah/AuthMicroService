@@ -267,15 +267,15 @@ public class GitHubOAuthController {
         return userInfo;
     }
 
-    @GetMapping("/contents")
-    public String getRepoContents(
-            @RequestParam String owner,
-            @RequestParam String repo,
-            @RequestParam String path,
-            @RequestParam(required = false) String token
-    ) {
-        return gitHubService.getRepoContent(owner, repo, path, token);
-    }
+//    @GetMapping("/contents")
+//    public String getRepoContents(
+//            @RequestParam String owner,
+//            @RequestParam String repo,
+//            @RequestParam String path,
+//            @RequestParam(required = false) String token
+//    ) {
+//        return gitHubService.getRepoContent(owner, repo, path, token);
+//    }
 
 
 }

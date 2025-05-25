@@ -1,13 +1,17 @@
 package com.example.sfmproject.ServiceImpl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -78,6 +82,7 @@ public class GitHubService {
         Map<String, Object> responseBody = response.getBody();
         return responseBody;
     }
+
     public ResponseEntity<String> addCollaborator(String githubAccessToken, String owner, String repo, String username, String permission) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(githubAccessToken);
@@ -96,6 +101,7 @@ public class GitHubService {
                 String.class
         );
     }
+
     // Get starred repositories
     public ResponseEntity<String> getStarredRepos(String githubAccessToken) {
         HttpHeaders headers = new HttpHeaders();
@@ -121,6 +127,7 @@ public class GitHubService {
 
         return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
     }
+
     public ResponseEntity<String> listRepositoryContent(String githubAccessToken, String owner, String repoName) {
         // Build the API URL
         String url = GITHUB_API_URL + "/repos/" + owner + "/" + repoName + "/contents";
@@ -180,7 +187,7 @@ public class GitHubService {
         }
     }
 
-    public String getRepoContent(String owner, String repo, String path, String token) {
+    public ResponseEntity<String> getRepoContent(String owner, String repo, String path, String token) {
         String url = UriComponentsBuilder
                 .fromHttpUrl("https://api.github.com/repos/{owner}/{repo}/contents/{path}")
                 .buildAndExpand(owner, repo, path)
@@ -196,10 +203,42 @@ public class GitHubService {
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
+        return restTemplate.exchange(
                 url, HttpMethod.GET, entity, String.class);
 
-        return response.getBody();
+    }
+
+    public String getFileContentFromApi(String owner, String repo, String path, String token) throws Exception {
+        String url = "https://api.github.com/repos/" + owner + "/" + repo + "/contents/" + path;
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        if (token != null && !token.isEmpty()) {
+            headers.set("Authorization", "token " + token);
+        }
+        headers.set("Accept", "application/vnd.github.v3+json");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            String body = response.getBody();
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(body);
+
+            // The content is base64 encoded
+            String encodedContent = root.get("content").asText();
+            // Remove newlines
+            encodedContent = encodedContent.replaceAll("\\n", "");
+
+            byte[] decodedBytes = Base64Utils.decodeFromString(encodedContent);
+            return new String(decodedBytes);
+        } else {
+            throw new RuntimeException("Failed to fetch file content: " + response.getStatusCode());
+        }
     }
 }
 
