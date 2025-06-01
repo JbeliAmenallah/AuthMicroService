@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/api/role/**",
                                 "/api/organisations/**",
                                 "/api/classes/**",
+                                "/api/user/**",
                                 "/api/departements/**",
                                 "/api/niveaux/**",
                                 "/api/auth/**",

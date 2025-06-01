@@ -56,10 +56,12 @@ public class UserServiceIMP implements UserServiceInterface {
     public User deleteUser(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
+            userRepository.deleteById(id);
             return user.get();
         } else {
             return null;
         }
+
     }
 
 
@@ -291,6 +293,9 @@ public class UserServiceIMP implements UserServiceInterface {
         }
         return userRepository.findByUsername(username);
     }
+
+
+
     public ResponseEntity<?> userforgetpassword(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
@@ -351,6 +356,56 @@ public class UserServiceIMP implements UserServiceInterface {
         }
     }
 
+
+    @Override
+    public User updateUser(User user, Long idUser) {
+        Optional<User> existingUserOpt = userRepository.findById(idUser);
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+
+            // Update fields
+            existingUser.setName(user.getName());
+            existingUser.setUsername(user.getUsername());
+            existingUser.setEmail(user.getEmail());
+            existingUser.setAddress(user.getAddress());
+
+            // Update roles
+            if (user.getRoles() != null) {
+                existingUser.setRoles(user.getRoles());
+            }
+
+            // Save updated user
+            return userRepository.save(existingUser);
+        } else {
+            throw new IllegalArgumentException("User not found with ID: " + idUser);
+        }
+    }
+
+
+    public ResponseEntity<User> updateUserRoles(Long userId, List<String> roleNames) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        User user = optionalUser.get();
+
+        // Clear existing roles
+        user.getRoles().clear();
+
+        // Add new roles
+        Set<Role> newRoles = new HashSet<>();
+        for (String roleName : roleNames) {
+            Role role = roleRepository.findByRoleName(RoleUser.valueOf(roleName.trim()))
+                    .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not found: " + roleName));
+            newRoles.add(role);
+        }
+
+        user.setRoles(newRoles);
+        userRepository.save(user);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 }
 
 

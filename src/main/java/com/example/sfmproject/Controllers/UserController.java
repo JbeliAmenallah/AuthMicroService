@@ -54,7 +54,9 @@ public class UserController {
     public void bloqueUser(@PathVariable("idUser") Long idUser) {
         userServiceIMP.bloqueUser(idUser);
     }
+
     @DeleteMapping("/delete-user/{idUser}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteAccount(@PathVariable("idUser") Long idUser) {
         userServiceIMP.deleteUser(idUser);
     }
@@ -108,5 +110,11 @@ public class UserController {
         return userService.getAllUserByRoleOrderSum_total(role1);
     }
     */
+
+    @PutMapping("/updateRoles/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<User> updateUserRoles(@PathVariable Long userId, @RequestBody List<String> roleNames) {
+        return userServiceIMP.updateUserRoles(userId, roleNames);
+    }
 
 }

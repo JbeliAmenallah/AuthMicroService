@@ -40,4 +40,6 @@ public interface UserServiceInterface {
 
     public Optional<User> getCurrentUser() ;
 
+
+    public User updateUser(User user ,  Long idUser) ;
 }
