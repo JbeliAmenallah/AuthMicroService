@@ -1,9 +1,12 @@
 package com.example.sfmproject.Controllers;
 
 import com.example.sfmproject.Entities.Departement;
+import com.example.sfmproject.Entities.Niveau;
 import com.example.sfmproject.Services.IDepartementService;
+import com.example.sfmproject.Services.INiveauService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +16,10 @@ public class DepartementController {
 
     @Autowired
     private IDepartementService departementService;
+
+
+    @Autowired
+    private INiveauService niveauService;
 
     // Get all departments
     @GetMapping
@@ -42,7 +49,7 @@ public class DepartementController {
 
         if (existingDepartement != null) {
             existingDepartement.setNomDepartement(updatedDepartement.getNomDepartement());
-           // existingDepartement.setOrganisation(updatedDepartement.getOrganisation());
+            // existingDepartement.setOrganisation(updatedDepartement.getOrganisation());
             existingDepartement.setNiveaux(updatedDepartement.getNiveaux());
             departementService.updateDepartement(id);
             return ResponseEntity.ok(existingDepartement);
@@ -57,4 +64,11 @@ public class DepartementController {
         departementService.deleteDepartement(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{deptId}/niveaux")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Niveau>> getNiveauxByDepartment(@PathVariable Long deptId) {
+        return ResponseEntity.ok(niveauService.getNiveauxByDepartment(deptId));
+    }
+
 }

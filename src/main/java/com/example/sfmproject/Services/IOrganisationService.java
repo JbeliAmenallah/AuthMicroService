@@ -12,4 +12,6 @@ public interface IOrganisationService {
     void deleteOrganisation(Long id);
     void updateOrganisation(Long id);
 
+    List<Organisation> getAllDataForAdmin();
+
 }

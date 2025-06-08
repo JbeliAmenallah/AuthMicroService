@@ -1,6 +1,7 @@
 package com.example.sfmproject.Controllers;
 
 import com.example.sfmproject.DTO.ResetPass;
+import com.example.sfmproject.Entities.Classe;
 import com.example.sfmproject.Entities.Enum.RoleUser;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.Repositories.UserRepository;
@@ -115,6 +116,38 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> updateUserRoles(@PathVariable Long userId, @RequestBody List<String> roleNames) {
         return userServiceIMP.updateUserRoles(userId, roleNames);
+    }
+
+
+
+    //imen houas
+    @GetMapping("/allteachers")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<User>> getAllTeachers() {
+        return ResponseEntity.ok(userServiceIMP.getAllTeachers());
+    }
+
+    @GetMapping("/all-students")
+    public ResponseEntity<List<User>> getAllStudents() {
+        return ResponseEntity.ok(userServiceIMP.getAllStudents());
+    }
+
+    @GetMapping("/teacher/classes")
+    @PreAuthorize("hasRole('enseignant')")
+    public ResponseEntity<List<Classe>> getClassesForTeacher() {
+        User loggedInUser = userServiceIMP.getCurrentUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Classe> classes = userServiceIMP.getClassesForTeacher(loggedInUser.getId());
+        return ResponseEntity.ok(classes);
+    }
+
+    @GetMapping("/student/class")
+    @PreAuthorize("hasRole('etudiant')")
+    public ResponseEntity<Classe> getClassForStudent() {
+        User loggedInUser = userServiceIMP.getCurrentUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Classe studentClass = userServiceIMP.getClassForStudent(loggedInUser.getId());
+        return ResponseEntity.ok(studentClass);
     }
 
 }

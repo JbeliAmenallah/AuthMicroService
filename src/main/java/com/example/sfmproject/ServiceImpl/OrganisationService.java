@@ -38,5 +38,10 @@ public class OrganisationService implements IOrganisationService {
     organisationRepository.save(organisationRepository.findById(id).get());
     }
 
+    @Override
+    public List<Organisation> getAllDataForAdmin() {
+        return organisationRepository.findAll();
+    }
+
 
 }

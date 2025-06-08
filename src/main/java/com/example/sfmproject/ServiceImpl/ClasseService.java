@@ -36,4 +36,15 @@ classeRepository.save(classeRepository.findById(id).get());
     public void DeleteClasse(Long id) {
 classeRepository.deleteById(id);
     }
+
+    @Override
+    public List<Classe> getClassesByNiveau(Long niveauId) {
+
+        return classeRepository.findClassesByNiveauId(niveauId);
+    }
+
+    @Override
+    public List<Classe> getClassesByTeacherId(Long teacherId) {
+        return classeRepository.findTeachingClassesByUserId(teacherId);
+    }
 }

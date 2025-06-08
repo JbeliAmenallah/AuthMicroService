@@ -3,11 +3,13 @@ package com.example.sfmproject.ServiceImpl;
 
 
 import com.example.sfmproject.DTO.ResetPass;
+import com.example.sfmproject.Entities.Classe;
 import com.example.sfmproject.Entities.Enum.RoleUser;
 import com.example.sfmproject.Entities.Role;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.Repositories.RoleRepository;
 import com.example.sfmproject.Repositories.UserRepository;
+import com.example.sfmproject.Repositories.classeRepository;
 import com.example.sfmproject.Services.OTPInterface;
 import com.example.sfmproject.Services.UserServiceInterface;
 import jakarta.validation.Valid;
@@ -37,6 +39,8 @@ public class UserServiceIMP implements UserServiceInterface {
     LocalFileStorageService localFileStorageService;
     @Autowired
     OTPInterface otpInterface;
+    @Autowired
+    private com.example.sfmproject.Repositories.classeRepository classeRepository;
 
 
     public List<User> getAllUser() {
@@ -48,8 +52,8 @@ public class UserServiceIMP implements UserServiceInterface {
         return userRepository.findById(idUser).orElseThrow(() -> new IllegalArgumentException("Provider ID not Found"));
     }
 
-    public List<User> getUserByRoles(RoleUser roleName){
-        Role role= roleRepository.findByRoleName(roleName).get();
+    public List<User> getUserByRoles(RoleUser roleName) {
+        Role role = roleRepository.findByRoleName(roleName).get();
         return userRepository.findByRolesContains(role);
     }
 
@@ -67,7 +71,7 @@ public class UserServiceIMP implements UserServiceInterface {
 
     public List<User> getAlluserprofiles() {
         List<User> users = userRepository.findAll();
-        List<User> userslist =new ArrayList<>();
+        List<User> userslist = new ArrayList<>();
 
         for (User user : users) {
             // Extract only the image name without the path
@@ -107,11 +111,12 @@ public class UserServiceIMP implements UserServiceInterface {
     public void updateUser(Long id) {
 
     }
-    public void  debloqueUser(Long idUser){
+
+    public void debloqueUser(Long idUser) {
         Optional<User> user = userRepository.findById(idUser);
         User user1 = user.get();
         String Newligne = System.getProperty("line.separator");
-        String body = "compte bloque\n  use this link to verify your account is :" + Newligne ;
+        String body = "compte bloque\n  use this link to verify your account is :" + Newligne;
         if (user.isPresent()) {
 
             user1.setBlocked(false);
@@ -140,7 +145,7 @@ public class UserServiceIMP implements UserServiceInterface {
         String Newligne = System.getProperty("line.separator");
         String url = "http://localhost:4200/auth/verification/" + user1.getToken();
         String body = "Soyez le bienvenue dans notre platforme GITHUB  \n  veuillez utuliser ce lien là pour s'authentifier :" + Newligne + url + Newligne + "verification" +
-                "Voici votre code de verfication  TN1122" ;
+                "Voici votre code de verfication  TN1122";
         if (user.isPresent()) {
 
             user1.setBlocked(true);
@@ -152,7 +157,8 @@ public class UserServiceIMP implements UserServiceInterface {
             }
         }
     }
-    public ResponseEntity<User> registerUserViaGoogle (User user1, String roleName) {
+
+    public ResponseEntity<User> registerUserViaGoogle(User user1, String roleName) {
 
 
         User user = new User(null, null, user1.getEmail(), null, false, user1.getAddress(), true);
@@ -177,7 +183,7 @@ public class UserServiceIMP implements UserServiceInterface {
                     // + "<strong>Verification Code ! max 5 min ! :</strong> " + verificationCode + newLine
                     + "</div>";
             try {
-                mailSending.send(user.getEmail(), "CoConsult Says Welcome" , htmlMessage);
+                mailSending.send(user.getEmail(), "CoConsult Says Welcome", htmlMessage);
                 return new ResponseEntity<User>(user, HttpStatus.OK);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -188,6 +194,7 @@ public class UserServiceIMP implements UserServiceInterface {
         }
 
     }
+
     public ResponseEntity<User> registerUser(User user1, String roleName) {
         if (userRepository.existsByUsername(user1.getUsername())) {
             return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
@@ -209,7 +216,7 @@ public class UserServiceIMP implements UserServiceInterface {
         if (suser != null) {
             //String Newligne = System.getProperty("line.separator");
             String userEmail = user.getEmail();
-            String url = "http://localhost:4200/verification/"+userEmail ;
+            String url = "http://localhost:4200/verification/" + userEmail;
             String verificationCode = otpInterface.GenerateOTp().getIdentification(); // Replace with your actual verification code
             String newLine = "<br/>"; // HTML line break
             String htmlMessage = "<div style='border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;'>"
@@ -219,7 +226,7 @@ public class UserServiceIMP implements UserServiceInterface {
                     + "<strong>Verification Code ! max 5 min ! :</strong> " + verificationCode + newLine
                     + "</div>";
             try {
-                mailSending.send(user.getEmail(), "Welcome "+ user.getName() , htmlMessage);
+                mailSending.send(user.getEmail(), "Welcome " + user.getName(), htmlMessage);
                 return new ResponseEntity<User>(user, HttpStatus.OK);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -250,7 +257,7 @@ public class UserServiceIMP implements UserServiceInterface {
             String Newligne = System.getProperty("line.separator");
             String url = "http://localhost:4200/auth/verification/" + suser.getToken();
             String body = "Soyez le bienvenue dans notre platforme ECOtalan  \n  veuillez utuliser ce lien là pour s'authentifier :" + Newligne + url + Newligne + "verification" +
-                    "Voici votre code de verfication  TN1122" ;
+                    "Voici votre code de verfication  TN1122";
             try {
                 mailSending.send(user.getEmail(), "Welcome", body);
                 return new ResponseEntity<User>(user, HttpStatus.OK);
@@ -295,7 +302,6 @@ public class UserServiceIMP implements UserServiceInterface {
     }
 
 
-
     public ResponseEntity<?> userforgetpassword(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
@@ -309,8 +315,8 @@ public class UserServiceIMP implements UserServiceInterface {
                     + "<strong>Verification Code ! max 5 min ! :</strong> " + verificationCode + newLine
                     + "</div>";
             try {
-                mailSending.send(user.get().getEmail(), "Did you Forget your password ?"+ user.get().getName() , htmlMessage);
-                return new ResponseEntity<>( HttpStatus.OK);
+                mailSending.send(user.get().getEmail(), "Did you Forget your password ?" + user.get().getName(), htmlMessage);
+                return new ResponseEntity<>(HttpStatus.OK);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -320,7 +326,7 @@ public class UserServiceIMP implements UserServiceInterface {
         }
     }
 
-    public  ResponseEntity<?>  updatePassword(String username, ResetPass updatePasswordDto) {
+    public ResponseEntity<?> updatePassword(String username, ResetPass updatePasswordDto) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
             String storedHashedPassword = user.get().getPassword();
@@ -337,14 +343,14 @@ public class UserServiceIMP implements UserServiceInterface {
 
         }
     }
-    public  ResponseEntity<?>  updatePasswordBymail(String email, ResetPass updatePasswordDto) {
+
+    public ResponseEntity<?> updatePasswordBymail(String email, ResetPass updatePasswordDto) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
             Boolean verif = otpInterface.VerifOTP(updatePasswordDto.getCode());
             if (verif == false) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            else {
+            } else {
                 user.get().setPassword(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
                 userRepository.save(user.get());
                 return new ResponseEntity<>(HttpStatus.OK);
@@ -406,6 +412,35 @@ public class UserServiceIMP implements UserServiceInterface {
 
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+
+    //imen houas
+
+    public List<User> getAllTeachers() {
+        return userRepository.findAllTeachers();
+    }
+
+    public List<User> getAllStudents() {
+        return userRepository.findAllStudents();
+    }
+
+    public List<User> getStudentsInClass(Long classId) {
+        Role studentRole = roleRepository.findByRoleName(RoleUser.etudiant)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
+        return userRepository.findStudentsByClassId(classId, studentRole);
+    }
+
+
+    public List<Classe> getClassesForTeacher(Long teacherId) {
+        return this.classeRepository.findTeachingClassesByUserId(teacherId);
+    }
+
+    public Classe getClassForStudent(Long studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        return student.getClassEntity();
+    }
 }
+
 
 

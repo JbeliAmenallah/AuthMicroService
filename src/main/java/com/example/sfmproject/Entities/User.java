@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +41,21 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+
+
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    @JsonIgnore
+    private Classe classEntity; // For students
+
+    @ManyToMany
+    @JoinTable(
+            name = "teacher_classes",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "class_id")
+    )
+    @JsonIgnore
+    private List<Classe> teachingClasses = new ArrayList<>();
 
     public User(String name, String username, String email, String password, boolean blocked, String address, boolean valid) {
 

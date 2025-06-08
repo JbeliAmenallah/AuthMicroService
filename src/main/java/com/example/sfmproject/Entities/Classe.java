@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -23,4 +26,12 @@ public class Classe {
     @ManyToOne
     @JsonIgnore
     private Niveau niveau;
+
+    @ManyToMany(mappedBy = "teachingClasses", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonIgnore
+    private List<User> teachers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<User> students = new ArrayList<>();
 }

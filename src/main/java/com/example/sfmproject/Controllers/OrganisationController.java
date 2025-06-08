@@ -1,9 +1,13 @@
 package com.example.sfmproject.Controllers;
 
+import com.example.sfmproject.Entities.Departement;
 import com.example.sfmproject.Entities.Organisation;
+import com.example.sfmproject.Services.IDepartementService;
 import com.example.sfmproject.Services.IOrganisationService;
+import com.example.sfmproject.Services.IDepartementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +17,9 @@ public class OrganisationController {
 
     @Autowired
     private IOrganisationService organisationService;
+    @Autowired
+    private IDepartementService departementService;
+
 
     // Get all organisations
     @GetMapping
@@ -56,4 +63,19 @@ public class OrganisationController {
         organisationService.deleteOrganisation(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/admin/hierarchy")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Organisation>> getHierarchyForAdmin() {
+        return ResponseEntity.ok(organisationService.getAllDataForAdmin());
+    }
+
+    @GetMapping("/{orgId}/departments")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Departement>> getDepartmentsByOrganisation(@PathVariable Long orgId) {
+        List<Departement> departements = departementService.getDepartmentsByOrganisation(orgId);
+        return ResponseEntity.ok(departements);
+    }
+
+
 }

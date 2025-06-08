@@ -2,9 +2,13 @@ package com.example.sfmproject.Controllers;
 
 
 import com.example.sfmproject.Entities.Classe;
+import com.example.sfmproject.Entities.User;
+import com.example.sfmproject.ServiceImpl.UserServiceIMP;
 import com.example.sfmproject.Services.IClasseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +19,9 @@ public class ClasseController {
 
     @Autowired
     private IClasseService classeService;
+
+    @Autowired
+    private UserServiceIMP userServiceIMP;
 
     // Get all classes
     @GetMapping
@@ -58,4 +65,21 @@ public class ClasseController {
         classeService.DeleteClasse(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/niveau/{niveauId}")
+    public ResponseEntity<List<Classe>> getClassesByNiveau(@PathVariable Long niveauId) {
+        List<Classe> classes = classeService.getClassesByNiveau(niveauId);
+        return ResponseEntity.ok(classes);
+    }
+
+    // Get classes by teacher ID
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<Classe>> getClassesByTeacherId(@PathVariable Long teacherId) {
+        List<Classe> classes = classeService.getClassesByTeacherId(teacherId);
+        return ResponseEntity.ok(classes);
+    }
+
+
+
+
 }

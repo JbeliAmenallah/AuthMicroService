@@ -37,4 +37,9 @@ public class NiveauService implements INiveauService {
     public void addNiveau(Niveau niveau) {
         niveauRepository.save(niveau);
     }
+
+    @Override
+    public List<Niveau> getNiveauxByDepartment(Long deptId) {
+        return niveauRepository.findNiveauxByDepartmentId(deptId);
+    }
 }

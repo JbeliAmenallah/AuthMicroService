@@ -14,5 +14,7 @@ public interface IClasseService {
     void UpdateClasse(Long id);
     void DeleteClasse(Long id);
 
+     List<Classe> getClassesByNiveau(Long niveauId);
+     List<Classe> getClassesByTeacherId(Long teacherId);
 
 }

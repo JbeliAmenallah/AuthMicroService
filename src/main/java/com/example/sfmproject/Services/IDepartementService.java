@@ -12,5 +12,6 @@ public interface IDepartementService {
     void updateDepartement(Long id);
     void deleteDepartement(Long id);
 
+    List<Departement> getDepartmentsByOrganisation(Long orgId);
 
 }

@@ -12,5 +12,6 @@ public interface INiveauService {
     void deleteNiveau(Long id);
     void addNiveau(Niveau niveau);
 
+    List<Niveau> getNiveauxByDepartment(Long deptId);
 
 }
