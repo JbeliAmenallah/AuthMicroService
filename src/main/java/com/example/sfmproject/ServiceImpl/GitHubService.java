@@ -240,5 +240,19 @@ public class GitHubService {
             throw new RuntimeException("Failed to fetch file content: " + response.getStatusCode());
         }
     }
+
+
+    public ResponseEntity<String> getCommits(String githubAccessToken, String owner, String repo) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(githubAccessToken);
+        headers.set("Accept", "application/vnd.github.v3+json");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String url = String.format("https://api.github.com/repos/%s/%s/commits", owner, repo);
+
+        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+    }
+
 }
 

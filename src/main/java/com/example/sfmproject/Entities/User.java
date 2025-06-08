@@ -28,6 +28,7 @@ public class User {
     private boolean valid;
     private String token;
     private String image;
+    private String githubToken; // New field for GitHub access token
 
     @OneToMany(mappedBy = "user")
     private List<Task> tasks;

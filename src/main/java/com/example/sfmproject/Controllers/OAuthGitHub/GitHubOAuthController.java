@@ -71,6 +71,59 @@ public class GitHubOAuthController {
                 .build();
     }
 
+//    @GetMapping("/token")
+//    public ResponseEntity<?> handleGitHubCode(@RequestParam("code") String code) {
+//        try {
+//            String accessToken = getAccessToken(code);
+//            Map<String, Object> githubUser = getGitHubUserInfo(accessToken);
+//
+//            String email = (String) githubUser.get("email");
+//            String name = (String) githubUser.get("name");
+//            String username = (String) githubUser.get("login");
+//
+//            if (email == null) {
+//                return ResponseEntity.badRequest().body("Could not retrieve email from GitHub");
+//            }
+//
+//            // Same user logic as before
+//            User user = userRepository.findByEmail(email).orElseGet(() -> {
+//                User newUser = new User(
+//                        name != null ? name : username,
+//                        username,
+//                        email,
+//                        UUID.randomUUID().toString(),
+//                        false,
+//                        null,
+//                        true
+//                );
+//                Role userRole = roleRepository.findByRoleName(RoleUser.ADMIN)
+//                        .orElseThrow(() -> new RuntimeException("Role not found"));
+//                newUser.setRoles(Set.of(userRole));
+//                return userRepository.save(newUser);
+//            });
+//
+//            // Auth and tokens
+//            UserPrinciple userPrinciple = UserPrinciple.build(user);
+//            Authentication auth = new UsernamePasswordAuthenticationToken(userPrinciple, null, userPrinciple.getAuthorities());
+//            SecurityContextHolder.getContext().setAuthentication(auth);
+//
+//            List<String> tokens = jwtProvider.generateJwtTokens(auth, accessToken);
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("accessToken", tokens.get(0));
+//            response.put("refreshToken", tokens.get(1));
+//            response.put("user", user);
+//            response.put("githubOrgs", githubUser.get("orgs"));
+//
+//            return ResponseEntity.ok(response);
+//
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("GitHub OAuth failed: " + e.getMessage());
+//        }
+//    }
+
+
     @GetMapping("/token")
     public ResponseEntity<?> handleGitHubCode(@RequestParam("code") String code) {
         try {
@@ -85,24 +138,30 @@ public class GitHubOAuthController {
                 return ResponseEntity.badRequest().body("Could not retrieve email from GitHub");
             }
 
-            // Same user logic as before
+            // Check if user exists or create a new one
             User user = userRepository.findByEmail(email).orElseGet(() -> {
                 User newUser = new User(
                         name != null ? name : username,
                         username,
                         email,
-                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(), // Random password for OAuth users
                         false,
                         null,
                         true
                 );
-                Role userRole = roleRepository.findByRoleName(RoleUser.ADMIN)
+
+                Role userRole = roleRepository.findByRoleName(RoleUser.ADMIN) // Assign default role (adjust as necessary)
                         .orElseThrow(() -> new RuntimeException("Role not found"));
                 newUser.setRoles(Set.of(userRole));
+
                 return userRepository.save(newUser);
             });
 
-            // Auth and tokens
+            // Update the user's GitHub token
+            user.setGithubToken(accessToken);
+            userRepository.save(user); // Save the updated user
+
+            // Authenticate the user
             UserPrinciple userPrinciple = UserPrinciple.build(user);
             Authentication auth = new UsernamePasswordAuthenticationToken(userPrinciple, null, userPrinciple.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
@@ -267,15 +326,6 @@ public class GitHubOAuthController {
         return userInfo;
     }
 
-//    @GetMapping("/contents")
-//    public String getRepoContents(
-//            @RequestParam String owner,
-//            @RequestParam String repo,
-//            @RequestParam String path,
-//            @RequestParam(required = false) String token
-//    ) {
-//        return gitHubService.getRepoContent(owner, repo, path, token);
-//    }
 
 
 }

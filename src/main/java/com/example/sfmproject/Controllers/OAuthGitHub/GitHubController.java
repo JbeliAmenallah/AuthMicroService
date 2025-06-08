@@ -243,4 +243,21 @@ public class GitHubController {
         }
     }
 
+    @GetMapping("/repos/{owner}/{repo}/commits")
+    public ResponseEntity<String> getRepositoryCommits(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String owner,
+            @PathVariable String repo) {
+
+        String jwt = token.replace("Bearer ", "");
+        String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+
+        try {
+            ResponseEntity<String> response = gitHubService.getCommits(githubToken, owner, repo);
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch commits: " + e.getMessage());
+        }
+    }
 }
