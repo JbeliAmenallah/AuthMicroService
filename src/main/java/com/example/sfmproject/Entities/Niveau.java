@@ -27,6 +27,5 @@ public class Niveau {
     private Departement department;
 
     @OneToMany(mappedBy = "niveau")
-    @JsonIgnore
     private List<Classe> classes = new ArrayList<>();
 }

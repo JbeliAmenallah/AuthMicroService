@@ -25,7 +25,6 @@ public class Organisation {
     private String address;
 
     @OneToMany(mappedBy = "organisation")
-    @JsonIgnore
     private List<Departement> departments = new ArrayList<>();
 
 

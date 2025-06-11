@@ -52,10 +52,11 @@ public class User {
     @JoinTable(
             name = "teacher_classes",
             joinColumns = @JoinColumn(name = "teacher_id"),
-            inverseJoinColumns = @JoinColumn(name = "class_id")
+            inverseJoinColumns = @JoinColumn(name = "class_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"teacher_id", "class_id"})
     )
     @JsonIgnore
-    private List<Classe> teachingClasses = new ArrayList<>();
+    private Set<Classe> teachingClasses = new HashSet<>();
 
     public User(String name, String username, String email, String password, boolean blocked, String address, boolean valid) {
 
@@ -68,5 +69,7 @@ public class User {
         this.valid = valid;
 
     }
+
+
 
 }

@@ -6,7 +6,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -29,7 +31,7 @@ public class Classe {
 
     @ManyToMany(mappedBy = "teachingClasses", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
-    private List<User> teachers = new ArrayList<>();
+    private Set<User> teachers = new HashSet<>();
 
     @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

@@ -14,4 +14,5 @@ public interface IOrganisationService {
 
     List<Organisation> getAllDataForAdmin();
 
+    List<Organisation> getHierarchy();
 }

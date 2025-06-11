@@ -24,10 +24,9 @@ public class Departement {
 
 
     @ManyToOne
-
+    @JsonIgnore
     private Organisation organisation;
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Niveau> niveaux = new ArrayList<>();
 }

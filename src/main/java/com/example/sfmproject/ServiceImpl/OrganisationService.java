@@ -1,5 +1,7 @@
 package com.example.sfmproject.ServiceImpl;
 
+import com.example.sfmproject.Entities.Departement;
+import com.example.sfmproject.Entities.Niveau;
 import com.example.sfmproject.Repositories.organisationRepository;
 
 import com.example.sfmproject.Entities.Organisation;
@@ -12,6 +14,14 @@ import java.util.List;
 public class OrganisationService implements IOrganisationService {
     @Autowired
     organisationRepository organisationRepository;
+
+    @Autowired
+    DepartementService departementService;
+
+    @Autowired
+    NiveauService niveauService;
+
+
 
     @Override
     public List<Organisation> getAllOrganisations() {
@@ -43,5 +53,18 @@ public class OrganisationService implements IOrganisationService {
         return organisationRepository.findAll();
     }
 
+    @Override
+    public List<Organisation> getHierarchy() {
+        List<Organisation> organisations = getAllOrganisations();
+        for (Organisation org : organisations) {
+            List<Departement> departments = departementService.getDepartmentsByOrganisation(org.getIdOrganisation());
+            for (Departement dept : departments) {
+                List<Niveau> niveaux = niveauService.getNiveauxByDepartment(dept.getIdDepartement());
+                dept.setNiveaux(niveaux);
+            }
+            org.setDepartments(departments);
+        }
+        return organisations;
+    }
 
 }
