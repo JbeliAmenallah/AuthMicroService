@@ -11,22 +11,24 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@Builder
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String taskName;
-    private String schedule; // Ex : "0 0 * * *"
-    private String status;
-    private LocalDateTime lastRunTime;
+
+    private String title;
+    private String description;
+    private boolean completed;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "repository_id")
+    private Repository repository;
 
     @ManyToOne
-    @JoinColumn(name = "application_id")
-    private Application application;
+    @JoinColumn(name = "assigned_to_id")
+    private User assignedTo; // étudiant
 
-
+    private Double grade; // note
+    private String comment; // commentaire
 }

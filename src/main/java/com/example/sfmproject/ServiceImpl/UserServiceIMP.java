@@ -148,7 +148,7 @@ public class UserServiceIMP implements UserServiceInterface {
                 "Voici votre code de verfication  TN1122";
         if (user.isPresent()) {
 
-            user1.setBlocked(true);
+            user1.setValid(true);
             this.userRepository.save(user1);
             try {
                 mailSending.send(user1.getEmail(), "Welcome ", body);

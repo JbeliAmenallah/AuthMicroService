@@ -36,4 +36,7 @@ public class Classe {
     @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<User> students = new ArrayList<>();
+
+     @ManyToOne
+    private Departement departement;
 }

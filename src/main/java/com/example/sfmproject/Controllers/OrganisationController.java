@@ -225,6 +225,8 @@ public class OrganisationController {
         System.out.println("Total organisations retournées: " + userOrganisations.size());
         return ResponseEntity.ok(userOrganisations);
     }
+
+
 }
 
 

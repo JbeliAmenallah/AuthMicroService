@@ -260,4 +260,38 @@ public class GitHubController {
                     .body("Failed to fetch commits: " + e.getMessage());
         }
     }
+
+    @GetMapping("/repos/{owner}/{repo}/collaborators")
+    public ResponseEntity<?> getCollaborators(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String owner,
+            @PathVariable String repo) {
+        try {
+            // Extract JWT token
+            String jwt = token.replace("Bearer ", "");
+            String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+
+            // Prepare headers for GitHub API
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(githubToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // Make the API call to GitHub to get collaborators
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    String.format("https://api.github.com/repos/%s/%s/collaborators", owner, repo),
+                    HttpMethod.GET,
+                    entity,
+                    String.class
+            );
+
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (HttpClientErrorException e) {
+            return ResponseEntity.status(e.getStatusCode())
+                    .body("GitHub API Error: " + e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
+    }
 }
