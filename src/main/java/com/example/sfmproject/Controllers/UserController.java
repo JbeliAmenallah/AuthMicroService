@@ -3,9 +3,13 @@ package com.example.sfmproject.Controllers;
 import com.example.sfmproject.DTO.ResetPass;
 import com.example.sfmproject.Entities.Classe;
 import com.example.sfmproject.Entities.Enum.RoleUser;
+import com.example.sfmproject.Entities.Repository;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.Repositories.UserRepository;
+import com.example.sfmproject.ServiceImpl.RepositoryServiceIMP;
 import com.example.sfmproject.ServiceImpl.UserServiceIMP;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +34,9 @@ public class UserController {
     @Autowired
     UserRepository userRepository ;
 
+    @Autowired
+    RepositoryServiceIMP repositoryServiceIMP;
+
 
     @GetMapping("/list-user")
     @PreAuthorize("hasRole('ADMIN')")
@@ -37,6 +44,20 @@ public class UserController {
         return userServiceIMP.getAllUser();
     }
 
+    @GetMapping("/list-repo")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Repository> ListRepo() {
+        return repositoryServiceIMP.getAllRepositories();
+    }
+
+    @GetMapping("/repositories")
+    public ResponseEntity<List<Repository>> getUserRepositories(@RequestHeader("Authorization") String token) {
+        User loggedInUser = userServiceIMP.getCurrentUserFromToken(token) // Implement this method to extract user from token
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Repository> repositories = repositoryServiceIMP.getRepositoriesByUser(loggedInUser);
+        return ResponseEntity.ok(repositories);
+    }
 
 
     @PutMapping("/validate-user/{idUser}")
@@ -149,5 +170,6 @@ public class UserController {
         Classe studentClass = userServiceIMP.getClassForStudent(loggedInUser.getId());
         return ResponseEntity.ok(studentClass);
     }
+
 
 }

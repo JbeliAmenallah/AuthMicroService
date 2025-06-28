@@ -9,4 +9,7 @@ public class GitHubRepoRequest {
     private String description;
     @JsonProperty("private")
     private boolean isPrivate;
+    private String html_url; // This field maps to the JSON response
+
 }
+

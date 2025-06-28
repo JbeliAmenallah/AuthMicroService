@@ -2,8 +2,7 @@ package com.example.sfmproject.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import net.minidev.json.annotate.JsonIgnore;
 
 @Entity
 @Getter
@@ -23,12 +22,13 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "repository_id")
-    private Repository repository;
+    private Repository repository; // Task belongs to a specific repository
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
-    private User assignedTo; // étudiant
+    @JsonIgnore
+    private User assignedTo; // User assigned to this task
 
-    private Double grade; // note
-    private String comment; // commentaire
+    private Double grade; // Grade for the task
+    private String comment; // Comment on the task
 }

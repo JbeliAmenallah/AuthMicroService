@@ -156,4 +156,6 @@ public class AuthRestAPIs {
 //        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 //        return ResponseEntity.ok(new JwtResponse(jwt.get(0), jwt.get(1), userDetails.getUsername(), user.get().getId(), userDetails.getAuthorities()));
 //    }
+
+
 }

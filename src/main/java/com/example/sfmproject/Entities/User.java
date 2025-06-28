@@ -31,8 +31,6 @@ public class User {
     private String image;
     private String githubToken; // New field for GitHub access token
 
-    @OneToMany(mappedBy = "user")
-    private List<Task> tasks;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -45,7 +43,6 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    @JsonIgnore
     private Classe classEntity; // For students
 
     @ManyToMany
@@ -55,8 +52,20 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "class_id"),
             uniqueConstraints = @UniqueConstraint(columnNames = {"teacher_id", "class_id"})
     )
-    @JsonIgnore
     private Set<Classe> teachingClasses = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "assignedTo")
+    @JsonIgnore
+    private List<Task> assignedTasks = new ArrayList<>(); // Tasks assigned to this user
+
+    @OneToMany(mappedBy = "creator")
+    @JsonIgnore
+    private List<Repository> createdRepositories = new ArrayList<>(); // Repositories created by this user
+
+    @ManyToMany(mappedBy = "collaborators")
+    @JsonIgnore
+    private List<Repository> repositories = new ArrayList<>(); // Repositories this user collaborates on
 
     public User(String name, String username, String email, String password, boolean blocked, String address, boolean valid) {
 

@@ -12,6 +12,8 @@ import com.example.sfmproject.Repositories.UserRepository;
 import com.example.sfmproject.Repositories.classeRepository;
 import com.example.sfmproject.Services.OTPInterface;
 import com.example.sfmproject.Services.UserServiceInterface;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,7 @@ public class UserServiceIMP implements UserServiceInterface {
     OTPInterface otpInterface;
     @Autowired
     private com.example.sfmproject.Repositories.classeRepository classeRepository;
+    private String jwtSecret = "azerty"; // Consider injecting this from application properties
 
 
     public List<User> getAllUser() {
@@ -440,6 +443,29 @@ public class UserServiceIMP implements UserServiceInterface {
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         return student.getClassEntity();
     }
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+
+    public Optional<User> getCurrentUserFromToken(String token) {
+        String username = extractUsernameFromToken(token);
+        return username != null ? userRepository.findByUsername(username) : Optional.empty();
+    }
+
+    private String extractUsernameFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(jwtSecret)
+                    .parseClaimsJws(token.replace("Bearer ", "")) // Remove "Bearer " prefix
+                    .getBody();
+            return claims.getSubject(); // Extract the username or subject
+        } catch (Exception e) {
+            // Handle exceptions (e.g., token expired, invalid token)
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }
 
 

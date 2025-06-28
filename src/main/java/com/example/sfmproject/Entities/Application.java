@@ -21,8 +21,8 @@ public class Application {
     @OneToMany(mappedBy = "application")
     private List<LogEntry> logs;
 
-    @OneToMany(mappedBy = "application")
-    private List<Task> tasks;
+//    @OneToMany(mappedBy = "application")
+//    private List<Task> tasks;
 
     // Getters and Setters
 }
