@@ -7,6 +7,7 @@ import com.example.sfmproject.Entities.Repository;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.JWT.JwtProvider;
 import com.example.sfmproject.Repositories.RepositoryRepository;
+import com.example.sfmproject.Repositories.UserRepository;
 import com.example.sfmproject.ServiceImpl.GitHubService;
 import com.example.sfmproject.ServiceImpl.UserServiceIMP;
 import io.jsonwebtoken.*;
@@ -22,6 +23,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 
 //@CrossOrigin
 @CrossOrigin(origins = "http://localhost:4200")
@@ -34,6 +36,10 @@ public class GitHubController {
 
     @Autowired
     private UserServiceIMP userService;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Autowired
     private RepositoryRepository repositoryRepository;
@@ -77,7 +83,44 @@ public class GitHubController {
 
         return ResponseEntity.ok(response.getBody());
     }
+    @PostMapping("/Addcollaborator")
+    public ResponseEntity<?> addCollaboratorToRepo(
+            @RequestHeader("Authorization") String token,
+            @RequestBody CollaboratorRequest request) {
 
+        String jwt = token.replace("Bearer ", "");
+        String githubToken = jwtProvider.extractGithubAccessToken(jwt);
+
+        // Call the GitHub service to add the collaborator
+        ResponseEntity<String> githubResponse = gitHubService.addCollaborator(
+                githubToken,
+                request.getOwner(),
+                request.getRepo(),
+                request.getUsername(),
+                request.getPermission()
+        );
+
+        if (githubResponse.getStatusCode().is2xxSuccessful()) {
+            // If the collaborator was added successfully on GitHub, now register in the database
+            Optional<User> collaborator = userRepository.findByUsername(request.getUsername());
+
+            if (collaborator.isPresent()) {
+                Repository repository = repositoryRepository.findByGithubName(request.getRepo());
+
+                if (repository != null) {
+                    repository.getCollaborators().add(collaborator.get());
+                    repositoryRepository.save(repository); // Save the updated repository
+                    return ResponseEntity.ok("Collaborator added successfully to the database.");
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Repository not found.");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } else {
+            return ResponseEntity.status(githubResponse.getStatusCode()).body("Failed to add collaborator on GitHub.");
+        }
+    }
     @GetMapping("/repos")
     public ResponseEntity<?> getGitHubRepos(@RequestHeader("Authorization") String token) {
         String jwt = token.replace("Bearer ", "");

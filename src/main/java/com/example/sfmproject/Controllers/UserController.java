@@ -58,6 +58,11 @@ public class UserController {
         List<Repository> repositories = repositoryServiceIMP.getRepositoriesByUser(loggedInUser);
         return ResponseEntity.ok(repositories);
     }
+    @GetMapping("/repositories/{id}")
+    public Repository getRepoById(@PathVariable ("id") Long id) {
+        Repository repository = repositoryServiceIMP.getRepositoryById(id);
+        return repository;
+    }
 
 
     @PutMapping("/validate-user/{idUser}")

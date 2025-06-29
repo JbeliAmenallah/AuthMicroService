@@ -37,7 +37,7 @@ public class RepositoryServiceIMP implements IRepositoryService {
 
     @Override
     public Repository getRepositoryById(Long id) {
-        return null;
+        return repositoryRepository.findById(id).get();
     }
 
     @Override

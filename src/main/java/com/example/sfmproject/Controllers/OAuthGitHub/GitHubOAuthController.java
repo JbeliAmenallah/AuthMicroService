@@ -1,10 +1,13 @@
 package com.example.sfmproject.Controllers.OAuthGitHub;
 
+import com.example.sfmproject.DTO.CollaboratorRequest;
 import com.example.sfmproject.Entities.Enum.RoleUser;
+import com.example.sfmproject.Entities.Repository;
 import com.example.sfmproject.Entities.Role;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.Entities.UserPrinciple;
 import com.example.sfmproject.JWT.JwtProvider;
+import com.example.sfmproject.Repositories.RepositoryRepository;
 import com.example.sfmproject.Repositories.RoleRepository;
 import com.example.sfmproject.Repositories.UserRepository;
 
@@ -47,6 +50,9 @@ public class GitHubOAuthController {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private RepositoryRepository repositoryRepository;
 
     @Autowired
     private JwtProvider jwtProvider;

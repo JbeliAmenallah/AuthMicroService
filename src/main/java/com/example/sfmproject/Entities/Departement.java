@@ -22,6 +22,9 @@ public class Departement {
 
     private String nomDepartement;
 
+    @OneToOne(mappedBy = "departement")
+    @JsonIgnore
+    private User chef; // Le chef de ce département
 
     @ManyToOne
     @JsonIgnore

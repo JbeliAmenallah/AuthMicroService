@@ -7,5 +7,6 @@ public enum RoleUser {
     Entreprise,
     Utilisateur,
     enseignant,
-    etudiant
+    etudiant,
+    chefDepartement
 }

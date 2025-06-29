@@ -31,6 +31,9 @@ public class User {
     private String image;
     private String githubToken; // New field for GitHub access token
 
+    @OneToOne
+    @JoinColumn(name = "departement_id")
+    private Departement departement; // Chef de ce département
 
     @ManyToMany(fetch = FetchType.LAZY)
     @ToString.Exclude
@@ -78,6 +81,7 @@ public class User {
         this.valid = valid;
 
     }
+
 
 
 
