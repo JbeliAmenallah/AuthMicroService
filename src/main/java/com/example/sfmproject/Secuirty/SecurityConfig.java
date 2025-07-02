@@ -44,7 +44,10 @@ public class SecurityConfig {
                                 "/error",
                                 "/oauth/github/**",
                                 "/api/github/**",
-                                "/OTP/**"
+                                "/OTP/**",
+                                "/api/repository/**",
+                                "/api/tasks/**",
+                                "/api/phases/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

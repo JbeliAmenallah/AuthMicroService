@@ -1,10 +1,15 @@
 package com.example.sfmproject.ServiceImpl;
 
+import com.example.sfmproject.Entities.Phase;
 import com.example.sfmproject.Entities.Repository;
 import com.example.sfmproject.Entities.User;
 import com.example.sfmproject.Repositories.RepositoryRepository;
 import com.example.sfmproject.Services.IRepositoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,7 +17,7 @@ import java.util.List;
 
 @Service
 public class RepositoryServiceIMP implements IRepositoryService {
-@Autowired
+    @Autowired
     RepositoryRepository repositoryRepository;
 
     @Override
@@ -45,10 +50,38 @@ public class RepositoryServiceIMP implements IRepositoryService {
         return repositoryRepository.findAll();
     }
 
+    @Override
     public List<Repository> getRepositoriesByUser(User user) {
         List<Repository> repositories = new ArrayList<>();
         repositories.addAll(repositoryRepository.findByCreator(user));
         repositories.addAll(repositoryRepository.findByCollaboratorsContaining(user));
         return repositories;
     }
+
+    @Override
+    public void assignAverageGradeToRepository(Long repositoryId) {
+        Repository repository = repositoryRepository.findById(repositoryId).orElseThrow(() -> new RuntimeException("Repository not found"));
+
+        double totalGrade = 0.0;
+        int count = 0;
+
+        for (Phase phase : repository.getPhases()) {
+            if (phase.getGrade() != null) { // Ensure grade is not null
+                totalGrade += phase.getGrade();
+                count++;
+            }
+        }
+
+        // Calculate and assign the average grade to the repository
+        if (count > 0) {
+            double averageGrade = totalGrade / count;
+            repository.setGrade((long) averageGrade); // Assuming grade is of type Long
+        } else {
+            repository.setGrade(0L); // Set to 0 if no valid grades
+        }
+
+        repositoryRepository.save(repository); // Persist the updated repository
+    }
+
+
 }

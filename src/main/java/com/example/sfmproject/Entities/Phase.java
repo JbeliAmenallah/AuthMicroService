@@ -1,5 +1,6 @@
 package com.example.sfmproject.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +19,13 @@ public class Phase {
     private Long id;
 
     private String name; // Name of the phase
+    private Long grade; // Grade for the phase
     private String description; // Description of the phase
 
     @ManyToMany
     private Set<Repository> repositories = new HashSet<>(); // Repositories linked to this phase
+
+    @OneToMany(mappedBy = "phase")
+    @JsonIgnore
+    private Set<Task> tasks = new HashSet<>(); // Tasks linked to this phase
 }

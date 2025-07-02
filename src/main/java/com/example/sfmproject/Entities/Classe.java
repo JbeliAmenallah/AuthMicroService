@@ -37,6 +37,6 @@ public class Classe {
     @JsonIgnore
     private List<User> students = new ArrayList<>();
 
-     @ManyToOne
+    @ManyToOne
     private Departement departement;
 }

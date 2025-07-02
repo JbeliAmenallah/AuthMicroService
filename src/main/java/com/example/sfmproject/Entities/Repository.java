@@ -20,6 +20,7 @@ public class Repository {
     private String githubUrl;
     private String description;
     private Date createdAt;
+    private Long grade;
 
     @ManyToOne
     private Classe classe;
@@ -32,5 +33,6 @@ public class Repository {
 
 
     @ManyToMany(mappedBy = "repositories")
+    @JsonIgnore
     private Set<Phase> phases = new HashSet<>(); // Phases linked to this repository
 }
