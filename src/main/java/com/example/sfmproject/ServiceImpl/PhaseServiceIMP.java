@@ -60,9 +60,40 @@ public class PhaseServiceIMP implements IPhaseService {
         phaseRepository.save(phase);
     }
 
+//    @Override
+//    public void assignAverageGradeToPhase(Long phaseId, Long repoId) {
+//        Phase phase = phaseRepository.findById(phaseId).orElseThrow(() -> new RuntimeException("Phase not found"));
+//
+//        double totalGrade = 0.0;
+//        int count = 0;
+//
+//        for (Task task : phase.getTasks()) {
+//            if (task.getGrade() != null) { // Ensure grade is not null
+//                totalGrade += task.getGrade();
+//                count++;
+//            }
+//        }
+//
+//        // Calculate and assign the average grade to the phase
+//        if (count > 0) {
+//            double averageGrade = totalGrade / count;
+//            phase.setGrade((long) averageGrade); // Assuming grade is of type Long
+//        } else {
+//            phase.setGrade(0L); // Set to 0 if no valid grades
+//        }
+//
+//        phaseRepository.save(phase); // Persist the updated phase
+//    }
+
     @Override
-    public void assignAverageGradeToPhase(Long phaseId) {
-        Phase phase = phaseRepository.findById(phaseId).orElseThrow(() -> new RuntimeException("Phase not found"));
+    public void assignAverageGradeToPhase(Long phaseId, Long repoId) {
+        Phase phase = phaseRepository.findById(phaseId)
+                .orElseThrow(() -> new RuntimeException("Phase not found"));
+
+        // Check if the phase is linked to the given repository
+        if (phase.getRepositories().stream().noneMatch(repo -> repo.getId().equals(repoId))) {
+            throw new RuntimeException("Phase is not linked to the specified repository");
+        }
 
         double totalGrade = 0.0;
         int count = 0;

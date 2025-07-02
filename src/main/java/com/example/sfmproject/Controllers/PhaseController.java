@@ -46,9 +46,9 @@ public class PhaseController {
         phaseService.assignPhaseToRepository(phaseId, repoId);
         return ResponseEntity.ok().build();
     }
-    @PutMapping("/{phaseId}/assign-average-grade")
-    public ResponseEntity<Void> assignAverageGrade(@PathVariable Long phaseId) {
-        phaseService.assignAverageGradeToPhase(phaseId);
+    @PutMapping("/{phaseId}/assign-average-grade/{repoId}")
+    public ResponseEntity<Void> assignAverageGrade(@PathVariable Long phaseId, @PathVariable Long repoId ) {
+        phaseService.assignAverageGradeToPhase(phaseId,repoId);
         return ResponseEntity.ok().build(); // Return 200 OK if successful
     }
 

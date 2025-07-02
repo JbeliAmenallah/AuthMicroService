@@ -20,9 +20,9 @@ public class TaskController {
     @Autowired
     private PhaseServiceIMP phaseServiceIMP;
 
-    @PostMapping("/{phaseId}")
-    public ResponseEntity<Task> createTask(@RequestBody Task task, @PathVariable Long phaseId) {
-        return ResponseEntity.ok(taskService.createTask(task, phaseId));
+    @PostMapping("/{phaseId}/{reposID}")
+    public ResponseEntity<Task> createTask(@RequestBody Task task, @PathVariable Long phaseId,@PathVariable Long reposID) {
+        return ResponseEntity.ok(taskService.createTask(task, phaseId, reposID));
     }
 
     @GetMapping("/{id}")
@@ -35,12 +35,12 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task task) {
         return ResponseEntity.ok(taskService.updateTask(id, task));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/deleteTask/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
         return ResponseEntity.noContent().build();
@@ -63,5 +63,9 @@ public class TaskController {
         taskService.assignTaskToPhase(taskId, phaseId);
         return ResponseEntity.ok().build(); // Return 200 OK if successful
     }
-
+    @GetMapping("/repository/{repoId}")
+    public ResponseEntity<List<Task>> getTasksByRepository(@PathVariable Long repoId) {
+        List<Task> tasks = taskService.getTasksByRepository(repoId);
+        return ResponseEntity.ok(tasks); // Return the list of tasks
+    }
 }

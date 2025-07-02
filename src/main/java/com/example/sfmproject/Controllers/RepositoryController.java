@@ -145,4 +145,11 @@ public class RepositoryController {
         repositoryService.assignAverageGradeToRepository(repositoryId);
         return ResponseEntity.ok().build(); // Return 200 OK if successful
     }
+
+    @GetMapping("/{repoId}")
+    public ResponseEntity<Repository> getRepositoryById(@PathVariable Long repoId) {
+        Repository repository = repositoryService.getRepositoryById(repoId);
+        return ResponseEntity.ok(repository);
+    }
+
 }

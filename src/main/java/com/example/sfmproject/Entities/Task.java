@@ -1,5 +1,6 @@
 package com.example.sfmproject.Entities;
 
+import com.example.sfmproject.Entities.Enum.Priority;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,11 +30,13 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_id")
-    @JsonIgnore
     private User assignedTo; // User assigned to this task
 
     @ManyToOne
     private Phase phase; // Task belongs to a specific phase
+
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     private Double grade; // Grade for the task
     private String comment; // Comment on the task

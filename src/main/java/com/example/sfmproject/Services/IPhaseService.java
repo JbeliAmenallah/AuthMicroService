@@ -13,5 +13,5 @@ public interface IPhaseService {
         Phase getPhaseById(Long id);
         List<Phase> getAllPhases();
         void assignPhaseToRepository(Long phaseId, Long repoId);
-        public void assignAverageGradeToPhase(Long phaseId);
+        public void assignAverageGradeToPhase(Long phaseId, Long repoId);
 }
